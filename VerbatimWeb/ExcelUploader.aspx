@@ -4,7 +4,8 @@
     <div class="jumbotron">
         <h1>Upload a TSV/CSV!</h1>
         <h2>Make sure you have you columns set up in order: </h2>
-        <h2>(Title, Description, Category, Point Value)</h2>
+        <h2>(Title, Description, Category, Point Value, Picture URL)</h2>
+        <h2>Don't add headers, just the data!</h2>
     </div>
     <br />
     <asp:FileUpload accept=".csv*" ID="FileUploadCSV" runat="server" Font-Size="X-Large" Style="max-width:500px" />

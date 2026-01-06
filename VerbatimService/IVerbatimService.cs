@@ -127,6 +127,16 @@ namespace VerbatimService
         [OperationContract]
         [WebInvoke(Method = "GET", ResponseFormat = WebMessageFormat.Json, UriTemplate = "vip?s={s}")]
         string vip(string s);
+
+        [OperationContract]
+        [WebInvoke(Method = "GET", ResponseFormat = WebMessageFormat.Json,
+            BodyStyle = WebMessageBodyStyle.Bare, UriTemplate = "GetPlayDeck?Folder={Folder}&Name={Name}")]
+        Stream GetPlayDeck(string Folder,string Name);
+
+        [OperationContract]
+        [WebInvoke(Method = "GET", ResponseFormat = WebMessageFormat.Json,
+    BodyStyle = WebMessageBodyStyle.Bare, UriTemplate = "GetSqlDB")]
+        Stream GetSqlDB();
     }
 
 

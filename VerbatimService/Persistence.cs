@@ -62,7 +62,10 @@ namespace VerbatimService
 
         public Deck GetDeck(string DeckId)
         {
-            SQLiteCommand = new SQLiteCommand(Connection);
+            try
+            {
+                SQLiteCommand = new SQLiteCommand(Connection);
+            
 
             Deck Deck = new Deck();
             SQLiteCommand.CommandText = @"SELECT VerbatimDeck.VerbatimDeckId, Name, VerbatimDeck.Description, Author, IdentifiyngToken, UseStandardDistribution, COUNT(*), sum(case when pointvalue = 1 then 1 else 0 end), sum(case when pointvalue = 2 then 1 else 0 end), sum(case when pointvalue = 3 then 1 else 0 end), sum(case when pointvalue = 4 then 1 else 0 end), sum(case when pointvalue = 5 then 1 else 0 end), Language
@@ -90,6 +93,13 @@ namespace VerbatimService
                 }
             }
             return Deck;
+            }
+            catch (Exception e)
+            {
+                Deck d = new Deck();
+                d.Description = "in" + e.Message;
+                return new Deck();
+            }
         }
 
         public Card GetCard(string CardId)

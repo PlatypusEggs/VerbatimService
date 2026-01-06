@@ -1,5 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\EntityFramework.6.4.4\build\EntityFramework.props" Condition="Exists('..\packages\EntityFramework.6.4.4\build\EntityFramework.props')" />
   <Import Project="..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.0\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props" Condition="Exists('..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.0\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -68,6 +69,12 @@
     </Reference>
     <Reference Include="en-html2enml, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\evernote-cloud-sdk-windows.1.0.8\lib\net40\en-html2enml.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\packages\EntityFramework.6.4.4\lib\net45\EntityFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\packages\EntityFramework.6.4.4\lib\net45\EntityFramework.SqlServer.dll</HintPath>
     </Reference>
     <Reference Include="Evernote, Version=1.0.5377.16918, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\evernote-cloud-sdk-windows.1.0.8\lib\net40\Evernote.dll</HintPath>
@@ -180,6 +187,9 @@
     </Reference>
     <Reference Include="Microsoft.Win32.Registry, Version=4.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Win32.Registry.4.4.0\lib\net461\Microsoft.Win32.Registry.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.11.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="Owin, Version=1.0.0.0, Culture=neutral, PublicKeyToken=f0ebd12fd5e55cc5, processorArchitecture=MSIL">
       <HintPath>..\packages\Owin.1.0\lib\net40\Owin.dll</HintPath>
@@ -373,6 +383,15 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Data.SQLite, Version=1.0.115.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=MSIL">
+      <HintPath>..\packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.115.0\lib\net46\System.Data.SQLite.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Data.SQLite.EF6, Version=1.0.115.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Data.SQLite.EF6.1.0.115.0\lib\net46\System.Data.SQLite.EF6.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Data.SQLite.Linq, Version=1.0.115.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Data.SQLite.Linq.1.0.115.0\lib\net46\System.Data.SQLite.Linq.dll</HintPath>
+    </Reference>
     <Reference Include="System.Diagnostics.DiagnosticSource, Version=4.0.1.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Diagnostics.DiagnosticSource.4.3.0\lib\net46\System.Diagnostics.DiagnosticSource.dll</HintPath>
     </Reference>
@@ -472,9 +491,6 @@
     <Reference Include="System.Web.Optimization, Version=1.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35">
       <HintPath>..\packages\Microsoft.AspNet.Web.Optimization.1.1.3\lib\net40\System.Web.Optimization.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>..\packages\Newtonsoft.Json.11.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
-    </Reference>
     <Reference Include="System.Xml.ReaderWriter, Version=4.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Xml.ReaderWriter.4.3.0\lib\net46\System.Xml.ReaderWriter.dll</HintPath>
       <Private>True</Private>
@@ -530,9 +546,67 @@
     <Content Include="Content\bootstrap.css.map" />
     <Content Include="Content\bootstrap-theme.min.css.map" />
     <Content Include="Content\bootstrap-theme.css.map" />
+    <Content Include="highslide-full.js" />
+    <Content Include="highslide-full.min.js" />
+    <Content Include="highslide-full.packed.js" />
+    <Content Include="highslide-ie6.css" />
+    <Content Include="highslide-with-gallery.js" />
+    <Content Include="highslide-with-gallery.min.js" />
+    <Content Include="highslide-with-gallery.packed.js" />
+    <Content Include="highslide-with-html.js" />
+    <Content Include="highslide-with-html.min.js" />
+    <Content Include="highslide-with-html.packed.js" />
+    <Content Include="highslide.css" />
+    <Content Include="highslide.js" />
+    <Content Include="highslide.min.js" />
+    <Content Include="highslide.packed.js" />
+    <Content Include="highslide\graphics\close.png" />
+    <Content Include="highslide\graphics\closeX.png" />
+    <Content Include="highslide\graphics\controlbar-black-border.gif" />
+    <Content Include="highslide\graphics\controlbar-text-buttons.png" />
+    <Content Include="highslide\graphics\controlbar-white-small.gif" />
+    <Content Include="highslide\graphics\controlbar-white.gif" />
+    <Content Include="highslide\graphics\controlbar2.gif" />
+    <Content Include="highslide\graphics\controlbar3.gif" />
+    <Content Include="highslide\graphics\controlbar4-hover.gif" />
+    <Content Include="highslide\graphics\controlbar4.gif" />
+    <Content Include="highslide\graphics\fullexpand.gif" />
+    <Content Include="highslide\graphics\geckodimmer.png" />
+    <Content Include="highslide\graphics\icon.gif" />
+    <Content Include="highslide\graphics\loader.gif" />
+    <Content Include="highslide\graphics\loader.white.gif" />
+    <Content Include="highslide\graphics\outlines\beveled.png" />
+    <Content Include="highslide\graphics\outlines\drop-shadow.png" />
+    <Content Include="highslide\graphics\outlines\glossy-dark.png" />
+    <Content Include="highslide\graphics\outlines\outer-glow.png" />
+    <Content Include="highslide\graphics\outlines\rounded-black.png" />
+    <Content Include="highslide\graphics\outlines\rounded-white.png" />
+    <Content Include="highslide\graphics\resize.gif" />
+    <Content Include="highslide\graphics\scrollarrows.png" />
+    <Content Include="highslide\graphics\zoomin.cur" />
+    <Content Include="highslide\graphics\zoomout.cur" />
+    <Content Include="highslide\highslide-full.js" />
+    <Content Include="highslide\highslide-full.min.js" />
+    <Content Include="highslide\highslide-full.packed.js" />
+    <Content Include="highslide\highslide-ie6.css" />
+    <Content Include="highslide\highslide-with-gallery.js" />
+    <Content Include="highslide\highslide-with-gallery.min.js" />
+    <Content Include="highslide\highslide-with-gallery.packed.js" />
+    <Content Include="highslide\highslide-with-html.js" />
+    <Content Include="highslide\highslide-with-html.min.js" />
+    <Content Include="highslide\highslide-with-html.packed.js" />
+    <Content Include="highslide\highslide.css" />
+    <Content Include="highslide\highslide.js" />
+    <Content Include="highslide\highslide.min.js" />
+    <Content Include="highslide\highslide.packed.js" />
     <Content Include="MyDecks.aspx" />
     <Content Include="SearchDecks.aspx" />
     <Content Include="Site.Master" />
+    <Content Include="App_Data\Template1.jpg" />
+    <Content Include="App_Data\Template2.jpg" />
+    <Content Include="App_Data\Template3.jpg" />
+    <Content Include="App_Data\Template4.jpg" />
+    <Content Include="App_Data\Template5.jpg" />
     <Content Include="ViewSwitcher.ascx" />
     <Content Include="Web.config" />
     <Content Include="Bundle.config" />
@@ -647,11 +721,17 @@
       <DependentUpon>ViewSwitcher.ascx</DependentUpon>
     </Compile>
   </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
-    <Folder Include="App_Data\" />
-  </ItemGroup>
-  <ItemGroup>
+    <Content Include="highslide\graphics\outlines\Outlines.psd" />
+    <Content Include="fonts\FontsFree-Net-Proxima-Nova-Soft-W03-Regular.ttf" />
+    <Content Include="fonts\proxima-nova-soft.otf" />
+    <Content Include="fonts\Roboto-Medium.ttf" />
+    <Content Include="App_Data\proxima-nova-soft.otf" />
+    <Content Include="App_Data\Roboto-Medium.ttf" />
     <None Include="packages.config" />
+    <None Include="Properties\PublishProfiles\IISProfile.pubxml" />
+    <None Include="Properties\PublishProfiles\PlatypusEggs - Web Deploy.pubxml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -695,7 +775,12 @@
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.0\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.0\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props'))" />
+    <Error Condition="!Exists('..\packages\EntityFramework.6.4.4\build\EntityFramework.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\EntityFramework.6.4.4\build\EntityFramework.props'))" />
+    <Error Condition="!Exists('..\packages\EntityFramework.6.4.4\build\EntityFramework.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\EntityFramework.6.4.4\build\EntityFramework.targets'))" />
+    <Error Condition="!Exists('..\packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.115.0\build\net46\Stub.System.Data.SQLite.Core.NetFramework.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.115.0\build\net46\Stub.System.Data.SQLite.Core.NetFramework.targets'))" />
   </Target>
+  <Import Project="..\packages\EntityFramework.6.4.4\build\EntityFramework.targets" Condition="Exists('..\packages\EntityFramework.6.4.4\build\EntityFramework.targets')" />
+  <Import Project="..\packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.115.0\build\net46\Stub.System.Data.SQLite.Core.NetFramework.targets" Condition="Exists('..\packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.115.0\build\net46\Stub.System.Data.SQLite.Core.NetFramework.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

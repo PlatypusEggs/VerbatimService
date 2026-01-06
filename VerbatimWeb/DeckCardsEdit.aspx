@@ -140,9 +140,18 @@
                 </tr>
                 <tr>
                     <td>
+                        <b>Picture URL</b>:
+                    </td>
+                    <td>
+                        <asp:TextBox ID="TextBox10" runat="server" Columns="100" Text='<%# Bind("PictureURL") %>' />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
                         <asp:Button ValidationGroup="Insert" CssClass="btn btn-success" Text="Insert" CausesValidation="True" runat="server" CommandName="Insert" />
                     </td>
                 </tr>
+                
             </table>
         </InsertItemTemplate>
         

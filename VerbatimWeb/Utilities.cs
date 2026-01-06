@@ -15,7 +15,8 @@ namespace VerbatimWeb
     public class Utilities
     {
         public static readonly string ServerPassword = "PlatypusServerToken35_cgYjqa*345gfdr";
-        public static readonly string ServerDNS = "https://platypuseggs.com/VerbatimService.svc";
+        //public static readonly string ServerDNS = "https://platypuseggs.com/VerbatimService.svc";
+        public static readonly string ServerDNS = "https://verbatimgame.com/VerbatimService.svc";
         public static MemoryStream MakeGETRequestStream(string uri)
         {
 

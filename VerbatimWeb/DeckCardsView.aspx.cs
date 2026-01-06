@@ -50,7 +50,7 @@ namespace VerbatimWeb
             if (e.Row.Cells.Count > 1)
             {
                 // hides the Identity columns
-                e.Row.Cells[1].Visible = false;
+                //e.Row.Cells[1].Visible = false;
                 e.Row.Cells[2].Visible = false;
             }
         }

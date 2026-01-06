@@ -111,7 +111,7 @@ namespace VerbatimWeb
                 client.UploadData(QueryURL, "PUT", Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(Card)));
             }
         }
-        public void InsertCard(string Title, string Description, string Category, int PointValue, string CustomCategory)
+        public void InsertCard(string Title, string Description, string Category, int PointValue, string CustomCategory, string PictureURL)
         {
             if ((Category == "ADD NEW CATEGORY" && string.IsNullOrEmpty(CustomCategory)) || String.IsNullOrEmpty(Title) || String.IsNullOrEmpty(Description) || String.IsNullOrEmpty(Category))
             {
@@ -126,6 +126,7 @@ namespace VerbatimWeb
             Card.Description = Description;
             Card.Category = Category;
             Card.PointValue = PointValue;
+            Card.PictureURL = PictureURL;
 
             if (Category == "ADD NEW CATEGORY")
                 Card.Category = CustomCategory;

@@ -10,6 +10,7 @@ using System.ServiceModel;
 using System.ServiceModel.Web;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 
 namespace VerbatimService
 {
@@ -18,21 +19,21 @@ namespace VerbatimService
         private SQLiteConnection Connection;
         private Persistence Persistence;
         private ImageProcessing ImageProcessing;
-        private string DriveLetter = "C";
+        //private string DriveLetter = "C";
+        private string CurrentDirectory = @"C:\Verbatim\App_Data";
+
 
         private void Initialize()
         {
-            if (Directory.Exists("E:"))
-                DriveLetter = "E";
-            Connection = new SQLiteConnection("Data Source=" + DriveLetter + @":\Verbatim\Verbatim.sqlite;Version=3;");
+            //CurrentDirectory = System.Web.Hosting.HostingEnvironment.ApplicationPhysicalPath;
+            Connection = new SQLiteConnection("Data Source=" + CurrentDirectory + @"\Verbatim.sqlite;Version=3;");
             Connection.Open();
             Persistence = new Persistence();
             Persistence.Connection = Connection;
 
             ImageProcessing = new ImageProcessing();
-            ImageProcessing.DriveLetter = DriveLetter;
+            ImageProcessing.CurrentDirectory = CurrentDirectory;
             ImageProcessing.Connection = Connection;
-
         }
 
         public void EditCard(Card Card)
@@ -50,8 +51,17 @@ namespace VerbatimService
 
         public Deck GetDeck(string DeckId)
         {
-            Initialize();
-            return Persistence.GetDeck(DeckId);
+            try
+            {
+                Initialize();
+                return Persistence.GetDeck(DeckId);
+            }
+            catch (Exception e)
+            {
+                Deck d = new Deck();
+                d.Description = "init " + e.Message + " " + CurrentDirectory + e.StackTrace;
+                return d;
+            }
         }
 
         public Card GetCard(string CardId)
@@ -104,25 +114,26 @@ namespace VerbatimService
 
             try
             {
-                string Host = "platypuseggs.com";
+                string Host = "https://verbatimgame.com/verbatimService.svc/GetPlayDeck?Folder={0}&Name={1}";
                 if (System.Web.HttpContext.Current != null)
                     Host = System.Web.HttpContext.Current.Request.Url.Host;
 
                 if (string.IsNullOrEmpty(Token))
                 {
-                    Deck.ImageFile = Host + "/Verbatim/Sheets/Original/" + ImageProcessing.CreateDeck(Int32.Parse(DeckSize), SteamIDs, "");
+                    Deck.ImageFile = String.Format(Host, "Original", ImageProcessing.CreateDeck(Int32.Parse(DeckSize), SteamIDs, ""));
                     Deck.Cards = ImageProcessing.CardObjects;
                 }
                 else
                 {
-                    Deck.ImageFile = Host + "/Verbatim/Sheets/" + Token + "/" + ImageProcessing.CreateDeck(Int32.Parse(DeckSize), SteamIDs, Token);
+                    Deck.ImageFile = String.Format(Host, Token, ImageProcessing.CreateDeck(Int32.Parse(DeckSize), SteamIDs, Token));
                     Deck.Cards = ImageProcessing.CardObjects;
                 }
+                //Deck.Timevals = ImageProcessing.timevals;
                 return Deck;
             }
             catch (Exception E)
             {
-                Deck.ImageFile = E.Message;
+                Deck.ImageFile = E.Message + E.StackTrace;
                 return Deck;
             }
 
@@ -179,22 +190,28 @@ namespace VerbatimService
 
         public Stream RenderCard(string CardId)
         {
-            try
+            bool good = false;
+            MemoryStream ms = new MemoryStream();
+            while (!good)
             {
-                Initialize();
-                ImageProcessing.Initialize();
-                Card Card = GetCard(CardId);
+                try
+                {
+                    Initialize();
+                    ImageProcessing.Initialize();
+                    Card Card = GetCard(CardId);
 
-                Bitmap bmp = ImageProcessing.GenerateImage(Card);
-                MemoryStream ms = new MemoryStream();
-                bmp.Save(ms, System.Drawing.Imaging.ImageFormat.Jpeg);
-                ms.Position = 0;  //This's a very important
-                return ms;
+                    Bitmap bmp = ImageProcessing.GenerateImage(Card);
+                    bmp.Save(ms, System.Drawing.Imaging.ImageFormat.Jpeg);
+                    ms.Position = 0;  //This's a very important
+                    WebOperationContext.Current.OutgoingResponse.ContentType = "image/jpg";
+                    good = true;
+                    return ms;
+                }
+                catch
+                {
+                }
             }
-            catch (Exception e)
-            {
-                return new MemoryStream(Encoding.UTF8.GetBytes(e.Message + e.StackTrace));
-            }
+            return ms;
         }
 
         public void DeleteCardPlayHistories(List<string> SteamIDs, List<int> CardIDs)
@@ -238,6 +255,27 @@ namespace VerbatimService
                 Persistence.RefreshAccessToken(SteamId);
         }
 
+        public Stream GetPlayDeck(string Folder, string Name)
+        {
+            // name = "Original\xxxx"
+            try
+            {
+                MemoryStream ms = new MemoryStream();
+                Image Image = Image.FromFile(CurrentDirectory + @"\Verbatim\Sheets\" + Folder + "\\" + Name);
+                Image.Save(ms, System.Drawing.Imaging.ImageFormat.Jpeg);
+                ms.Position = 0;  //This's a very important
+                WebOperationContext.Current.OutgoingResponse.ContentType = "image/JPEG";
+                                WebOperationContext.Current.OutgoingResponse.ContentType = "image/JPEG";
+
+                WebOperationContext.Current.OutgoingResponse.ContentLength = ms.Length;
+                return ms;
+            }
+            catch (Exception e)
+            {
+                return new MemoryStream(Encoding.UTF8.GetBytes(e.Message + e.StackTrace));
+            }
+        }
+
         public string vip(string s)
         {
             List<string> o = new List<string>();
@@ -260,6 +298,18 @@ namespace VerbatimService
                     }
             o = o.Distinct().ToList();
             return String.Join(",", o.Select(x => x.ToString()).ToArray());
+        }
+
+        public Stream GetSqlDB()
+        {
+            try
+            {
+                return File.Open(CurrentDirectory +  @"\Verbatim.sqlite", FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+            }
+            catch (Exception e)
+            {
+                return new MemoryStream(Encoding.UTF8.GetBytes(e.Message + e.StackTrace));
+            }
         }
     }
 }

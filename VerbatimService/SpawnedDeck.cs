@@ -14,5 +14,7 @@ namespace VerbatimService
 
         [DataMember]
         public string ImageFile { get; set; }
+        [DataMember]
+        public List<string> Timevals{ get; set; }
     }
 }

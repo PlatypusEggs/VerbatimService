@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data.SQLite;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Drawing.Text;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -15,9 +16,12 @@ namespace VerbatimService
 {
     class ImageProcessing
     {
-        private static Font StringFontDesc = new Font("Roboto Medium", 20, FontStyle.Regular);
-        private static Font StringFontCat = new Font("Proxima Nova Soft", 25, FontStyle.Bold);
-        private static Font StringFontTitle = new Font("Proxima Nova Soft", 40, FontStyle.Bold);
+        private static Font StringFontDesc;
+        private static Font StringFontCat;
+        private static Font StringFontTitle;
+
+        PrivateFontCollection pfcoll = new PrivateFontCollection();
+
         private static StringFormat StringFormat = new StringFormat();
         private static StringFormat StringFormatDesc = new StringFormat();
         private static Image TemplateImage1;
@@ -30,7 +34,7 @@ namespace VerbatimService
         private static List<float> Distribution = new List<float> { 0.15f, 0.45f, 0.35f, 0.03f, 0.02f };
         public SQLiteConnection Connection;
         private int UnixTimeStamp;
-        public static string DriveLetter;
+        public static string CurrentDirectory;
 
         public static List<string> NotConflictRedWords = new List<string> {"its","it's","at","her","what","who","your","we're", "you're", "they're", "i'm", "by", "their", "than", "it", "as", "they", "you", "his", "&", "from", "with", "in", "of", "on", "you", "too", "to", "that", "the", "and", "but", "for", "nor", "or", "so", "yet", "a", "an", "be", "am", "are", "is", "was", "were", "being", "been", "can", "could", "dare", "do", "does", "did", "have", "has", "had", "having", "may", "might", "must", "need", "ought", "shall", "should", "will", "would" };
         public static List<char> SpecialCharacters = new List<char>() { ',', '.', '-', ' ', '\t', '\n', '\r' };
@@ -41,7 +45,6 @@ namespace VerbatimService
         public List<Card> CardObjects = new List<Card>();
         public Persistence Persistence = new Persistence();
         private int DeckId = -1;
-
 
         public string CreateDeck(int DeckSize, List<string> SteamIds, string Token)
         {
@@ -63,7 +66,6 @@ namespace VerbatimService
                 CardCounts = FixDistribution(Distribution, DeckSize);
 
             GenerateCards(CardCounts, SteamIds, DeckId, DeckSize);
-
             foreach (Card Card in CardObjects)
             {
                 Card.Description = ProcessMarkupString(Card.Description);
@@ -74,19 +76,17 @@ namespace VerbatimService
             string FileName = DateTime.Now.ToString("MM-dd-yyyy-HH：mm：ss") + ".jpg";
             string CurrentDirectory = "";
             if (DeckId == 1)
-                CurrentDirectory = DriveLetter + @":\inetpub\wwwroot\Verbatim\Sheets\Original\";
+                CurrentDirectory = ImageProcessing.CurrentDirectory + @"\Verbatim\Sheets\Original\";
             else
             {
-                if (!Directory.Exists(DriveLetter + @":\inetpub\wwwroot\Verbatim\Sheets\" + Token + "\\"))
-                    Directory.CreateDirectory(DriveLetter + @":\inetpub\wwwroot\Verbatim\Sheets\" + Token + "\\");
+                if (!Directory.Exists(ImageProcessing.CurrentDirectory + @"\Verbatim\Sheets\" + Token + "\\"))
+                    Directory.CreateDirectory(ImageProcessing.CurrentDirectory + @"\Verbatim\Sheets\" + Token + "\\");
                     
-                CurrentDirectory = DriveLetter + @":\inetpub\wwwroot\Verbatim\Sheets\" + Token + "\\";
+                CurrentDirectory = ImageProcessing.CurrentDirectory + @"\Verbatim\Sheets\" + Token + "\\";
             }
-
             string FullPictureFileName = CurrentDirectory + "\\" + FileName;
 
             SheetBitMap.Save(FullPictureFileName, ImageFormat.Jpeg);
-
             return FileName;
         }
 
@@ -99,8 +99,10 @@ namespace VerbatimService
             {
                 SteamIDList += "'" + SteamID + "',";
             }
-            if(SteamIDs.Count > 0)
-                SteamIDList = SteamIDList.Substring(0, SteamIDList.Length-1);
+            if (SteamIDs.Count > 0)
+                SteamIDList = SteamIDList.Substring(0, SteamIDList.Length - 1);
+            else
+                SteamIDList = "'NOPE'";
 
             //SELECT VerbatimCard.VerbatimCardId, Title, Description, Category, PointValue 
             //FROM VerbatimCard
@@ -111,6 +113,9 @@ namespace VerbatimService
             //AND PointValue = 1
             //AND VerbatimCardPlayHistory.VerbatimCardId IS NULL
             //ORDER BY RANDOM() LIMIT 10
+            string InsertSql = "";
+            string InsertSQLHead = @"INSERT INTO VerbatimCardPlayHistory (VerbatimCardId, SteamID, DateTimeUsed) VALUES ";
+
             string TemplateSQLRandom = @"		SELECT VerbatimCard.VerbatimCardId, Title, Description, Category, PointValue, PictureURL, 0 as rowOrder, RANDOM() as Random
 								FROM VerbatimCard 
 								LEFT JOIN VerbatimCardPlayHistory
@@ -174,8 +179,7 @@ namespace VerbatimService
 								                FROM VerbatimCardPlayHistory
 								                WHERE VerbatimCardId = {0}
 								                AND SteamID = '{1}'";
-                            string InsertSQL = @"INSERT INTO VerbatimCardPlayHistory (VerbatimCardId, SteamID, DateTimeUsed)
-								                 VALUES ({0},'{1}',{2})";
+                            string InsertSQLVal = "({0},'{1}',{2}),";
                             string UpdateSQL = @"UPDATE VerbatimCardPlayHistory
 								                SET DateTimeUsed = {2}
 								                WHERE VerbatimCardId = {0}
@@ -186,9 +190,7 @@ namespace VerbatimService
                                 SQLiteCommand UpsertSelectCommand = new SQLiteCommand(String.Format(UpsertSQLSelect, Card.VerbatimCardId, SteamID), Connection);
                                 if (UpsertSelectCommand.ExecuteScalar() == null)
                                 {
-
-                                    SQLiteCommand InsertCommand = new SQLiteCommand(String.Format(InsertSQL, Card.VerbatimCardId, SteamID, UnixTimeStamp), Connection);
-                                    InsertCommand.ExecuteNonQuery();
+                                    InsertSql += String.Format(InsertSQLVal, Card.VerbatimCardId, SteamID, UnixTimeStamp);
                                 }
                                 else
                                 {
@@ -197,9 +199,13 @@ namespace VerbatimService
                                 }
                             }
                         }
+
                     }
                     count++;
                 }
+                InsertSql = InsertSQLHead + InsertSql.TrimEnd(',') + ";";
+                SQLiteCommand InsertCommand = new SQLiteCommand(InsertSql, Connection);
+                InsertCommand.ExecuteNonQuery();
             }
             else
             {
@@ -274,11 +280,20 @@ namespace VerbatimService
 
         public void Initialize()
         {
-            TemplateImage1 = Image.FromFile(DriveLetter + @":\Verbatim\Template1.jpg");
-            TemplateImage2 = Image.FromFile(DriveLetter + @":\Verbatim\Template2.jpg");
-            TemplateImage3 = Image.FromFile(DriveLetter + @":\Verbatim\Template3.jpg");
-            TemplateImage4 = Image.FromFile(DriveLetter + @":\Verbatim\Template4.jpg");
-            TemplateImage5 = Image.FromFile(DriveLetter + @":\Verbatim\Template5.jpg");
+            TemplateImage1 = Image.FromFile(CurrentDirectory + @"\Template1.jpg");
+            TemplateImage2 = Image.FromFile(CurrentDirectory + @"\Template2.jpg");
+            TemplateImage3 = Image.FromFile(CurrentDirectory + @"\Template3.jpg");
+            TemplateImage4 = Image.FromFile(CurrentDirectory + @"\Template4.jpg");
+            TemplateImage5 = Image.FromFile(CurrentDirectory + @"\Template5.jpg");
+
+            pfcoll.AddFontFile(@"C:\Verbatim\App_Data\proxima-nova-soft.otf");
+            pfcoll.AddFontFile(@"C:\Verbatim\App_Data\Roboto-Medium.ttf");
+            FontFamily ProximaFamily = pfcoll.Families[0];
+            FontFamily RobotoFamily = pfcoll.Families[0];
+
+            StringFontTitle = new Font(ProximaFamily, 40, FontStyle.Bold);
+            StringFontCat = new Font(ProximaFamily, 25, FontStyle.Bold);
+            StringFontDesc = new Font(RobotoFamily, 20, FontStyle.Regular);
 
             StringFormat.LineAlignment = StringAlignment.Center;
             StringFormat.Alignment = StringAlignment.Center;
@@ -291,7 +306,7 @@ namespace VerbatimService
 
 
 
-            Connection = new SQLiteConnection("Data Source=" + DriveLetter + @":\Verbatim\Verbatim.sqlite;Version=3;");
+            Connection = new SQLiteConnection("Data Source=" + CurrentDirectory + @"\Verbatim.sqlite;Version=3;");
             Connection.Open();
             CardImages = new List<Bitmap>();
             CardObjects = new List<Card>();
@@ -320,6 +335,8 @@ namespace VerbatimService
 
             using (Graphics graphics = Graphics.FromImage(OutPutImage))
             {
+                graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
+
                 //                graphics.DrawString("testtesttesttesttesttesttesttesttestt esttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttes ttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttes ttesttesttesttest ttesttesttesttest ttesttesttesttest ttesttesttesttest ttesttesttesttest ttesttesttesttest ttesttesttesttest ttesttesttesttest ttesttesttesttest ttesttesttesttest ttesttesttesttest ttesttesttesttest ttesttesttesttest ttesttesttesttest ttesttesttesttest ttesttesttesttest ttesttesttesttest ttesttesttesttest ttesttesttesttest end", StringFontDesc, Brushes.Black,
 
 
@@ -458,7 +475,7 @@ namespace VerbatimService
 
         private static void DeleteOldFiles()
         {
-            List<string> Files = Directory.GetFiles(DriveLetter + @":\inetpub\wwwroot\Verbatim\Sheets\Original\").ToList();
+            List<string> Files = Directory.GetFiles(CurrentDirectory + @"\Verbatim\Sheets\Original\").ToList();
             foreach (string SheetFile in Files)
             {
                 if (Directory.GetCreationTime(SheetFile) < DateTime.Now.AddMinutes(-300))

@@ -23,6 +23,7 @@ namespace VerbatimWeb
     {
         protected void Page_Load(object sender, EventArgs e)
         {
+            //string a = System.IO.Directory.GetCurrentDirectory();
             if (!Utilities.CheckForValidSteamSession(Request.Cookies["AccessToken"]))
             {
                 var openid = new OpenIdRelyingParty();
@@ -84,10 +85,10 @@ namespace VerbatimWeb
 
         protected void SteamLogin(object sender, EventArgs e)
         {
-
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
             using (OpenIdRelyingParty openidd = new OpenIdRelyingParty())
             {
-                IAuthenticationRequest request = openidd.CreateRequest("http://steamcommunity.com/openid");
+                IAuthenticationRequest request = openidd.CreateRequest("https://steamcommunity.com/openid");
                 request.RedirectToProvider();
             }
             
